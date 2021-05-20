@@ -72,6 +72,11 @@ static CMARK_INLINE void outc(cmark_renderer *renderer, cmark_escaping escape,
   }
 }
 
+static CMARK_INLINE void raw_outc(cmark_renderer *renderer, cmark_escaping escape,
+                                  int32_t c, unsigned char nextc) {
+    cmark_render_code_point(renderer, c);
+}
+
 static int longest_backtick_sequence(const char *code) {
   int longest = 0;
   int current = 0;
@@ -476,6 +481,11 @@ char *cmark_render_commonmark(cmark_node *root, int options, int width) {
     // disable breaking on width, since it has
     // a different meaning with OPT_HARDBREAKS
     width = 0;
+  }
+
+  if (options & CMARK_OPT_NORMALIZE) {
+      // Stealing this option for this test
+      return cmark_render(root, options, width, raw_outc, S_render_node);
   }
   return cmark_render(root, options, width, outc, S_render_node);
 }
